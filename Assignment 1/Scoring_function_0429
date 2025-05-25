@@ -1,0 +1,34 @@
+from sklearn.metrics import make_scorer
+
+def Profit_top_20(y_true, y_pred_proba):
+    #print(y_pred_proba)
+    y_pred_proba_np = np.array(y_pred_proba)
+    #print(y_true)
+     # Get the indices that would sort y_pred_proba_np in descending order
+    sorted_indices = np.argsort(y_pred_proba_np)[::-1]
+    #print(sorted_indices.size)
+
+    # Use the sorted indices to reorder y_true and y_pred_proba_np
+    sorted_y_true = y_true[sorted_indices]
+    #print(sorted_y_true)
+    #print("sorted_y_true is sorted")
+    sorted_y_pred_proba = y_pred_proba_np[sorted_indices]
+    #print(sorted_y_pred_proba)
+    #print("sorted_y_pred_proba is sorted")
+
+    # Use the sorted indices to extract the correct average_cost_min
+    relevant_rows = X_train.iloc[sorted_indices]
+    #print(relevant_rows)
+    
+    Profit_TP = 0
+    for i in range(0, 20):
+        if sorted_y_true[i] >= sorted_y_pred_proba[i]: 
+            Profit_TP += relevant_rows['average cost min'][i]
+
+    ## to put a sum of top 20 profits
+ 
+    return Profit
+
+from sklearn.metrics import make_scorer
+
+model_score = make_scorer(score_func = Profit_top_20, response_method='predict_proba', greater_is_better=True)

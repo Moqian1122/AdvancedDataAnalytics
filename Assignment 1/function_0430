@@ -1,0 +1,49 @@
+# Set random seed for reproducibility
+random_seed = 42
+np.random.seed(random_seed)
+
+# Initialize KFold cross-validator with the same random seed
+kf = KFold(n_splits=3, shuffle = True, random_state=random_seed)
+
+# Manually split the data into folds using KFold
+manual_splits = list(kf.split(X_train))
+
+for k, (train_split, val_split) in enumerate(manual_splits):
+    xtrain_set = X_train.iloc[train_split, :]
+    ytrain_set = y_train[train_split]
+    xval_set = X_train.iloc[val_split, :]
+    yval_set = y_train[val_split]
+
+    rf = RandomForestClassifier()
+    rf.fit(X_train, y_train)
+
+    y_pred_proba = rf.predict_proba(xval_set)
+    y_pred_proba = [sublist[1] for sublist in y_pred_proba]
+
+    y_pred = (np.array(y_pred_proba) >= 0.5).astype(int)
+
+    y_pred_proba_np = np.array(y_pred_proba)
+
+    sorted_indices = np.argsort(y_pred_proba_np)[::-1]
+    
+    sorted_y_true = yval_set[sorted_indices]
+
+    sorted_y_pred = y_pred[sorted_indices]
+
+    sorted_y_pred_proba = y_pred_proba_np[sorted_indices]
+
+    relevant_rows = xval_set.iloc[sorted_indices]
+
+    df_results = pd.DataFrame()
+    df_results['sorted_indices'] = sorted_indices
+    df_results['sorted_y_true'] = sorted_y_true
+    df_results['sorted_y_pred'] = sorted_y_pred
+    df_results['sorted_y_pred_proba'] = sorted_y_pred_proba
+    df_results['average cost min'] = relevant_rows['average cost min']
+
+   # profittopk = 0
+    #for i in range(0, 20):
+       # if sorted_y_true[i] == sorted_y_pred[i]:
+           # profittopk += relevant_rows['average cost min'].iloc[i]
+            
+    #print(profittopk)
